@@ -16,11 +16,14 @@ type binOp =
   | Sub
   | Add
   | Div
+  | Mod
 
 type stmt =
   | Bind of (id * expr)
 and expr =
   (* | Nil *)
+  | False
+  | True
   | Float of float
   | Int of int
   | Id of id
@@ -35,18 +38,21 @@ and expr =
 
 
 let output_binOp = function
-  | Mult -> '*'
-  | Sub  -> '-'
-  | Add  -> '+'
-  | Div  -> '/'
+  | Mult -> "*"
+  | Sub  -> "-"
+  | Add  -> "+"
+  | Div  -> "/"
+  | Mod  -> "mod"
 
 let rec output_expr = function
+  | False   -> "false"
+  | True    -> "True"
   | Int i   -> string_of_int i
   | Float f -> string_of_float f
   | Id id   -> id
   | BinOp(expr_left, binOp, expr_right) -> (
       output_expr  (expr_left)
-      ^ (output_binOp binOp |> Char.escaped)
+      ^ output_binOp binOp
       ^ output_expr  (expr_right)
     )
 

@@ -1,14 +1,10 @@
 (*
 %token <float> FLOAT
-%token <boolean> BOOL
 %token <binary> BINARY
 %token LEFT_BRACE
 %token RIGHT_BRACE
 %token LEFT_BRACE
 %token RIGHT_BRACK
-
-%token LEFT_PARENS
-%token RIGHT_PARENS
 
 %token ASSIGN
 %token SEMICOLON
@@ -18,16 +14,14 @@
 *)
 
 %token <int> INT
-
-%token DIVIDE
-%token PLUS
-%token MINUS
-%token TIMES
+%token TRUE FALSE
 %token <string> ID
+
+%token LEFT_PARENS RIGHT_PARENS
+
+%token DIVIDE PLUS MINUS TIMES MODULO
+
 %token EOF
-
-
-
 (*
  Precedency
  0: *
@@ -36,34 +30,40 @@
  4: -
  *)
 
-%left PLUS
-%left TIMES
-%left MINUS
-%left DIVIDE
+%left PLUS MINUS
+%left TIMES DIVIDE MODULO
 
 %start <Ast.expr option> prog
 %%
 
 prog:
-  | e = expression { Some e };
-  | EOF      { None };
+  | e = expression EOF { Some e };
+  | EOF                { None };
 
-expression:
-  | left = expression; op = binop; right = expression
-    { Ast.BinOp (left, op, right) }
-  | i  = INT { Printf.fprintf stderr "Ast.Int lu %d\n" i; Ast.Int i }
-  | id = ID  { Ast.Id id }
 (*
-  | LEFT_PARENS; e = expression ;RIGHT_PARENS
-    {  }
- *)
-(*
-| LET; ID; EQUALS; expr = expr; SEMICOLON
+stm:
+  | stm SEMICOLON stm
 *)
 
-(* Inline pour eviter un shift/reduce conflict *)
 %inline binop:
   | PLUS   { Ast.Add }
   | MINUS  { Ast.Sub }
   | TIMES  { Ast.Mult }
   | DIVIDE { Ast.Div }
+  | MODULO { Ast.Mod }
+
+expression:
+  | TRUE { Ast.True }
+  | FALSE { Ast.False }
+  | i  = INT { Ast.Int i }
+  | id = ID  { Ast.Id id }
+  | left = expression; op = binop; right = expression
+    { Ast.BinOp (left, op, right) }
+  | LEFT_PARENS; e = expression ;RIGHT_PARENS
+    { e }
+(*
+| LET; ID; EQUALS; expr = expr; SEMICOLON
+*)
+
+(* Inline pour eviter un shift/reduce conflict *)
+

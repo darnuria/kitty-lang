@@ -16,33 +16,47 @@ let next_line lexbuf =
  *)
 }
 
-let modulo = "mod"
 let white = [' ' '\t']+
 let newline = '\n' | '\r' | "\r\n"
 let int = '-'? ['0'-'9']* (*[^ 'a'-'z' 'A'-'Z']*)
 let id = ['a'-'z' 'A'-'Z' '_'] ['a'-'z' 'A'-'Z' '0'-'9' '_']*
 (* let invalidId = '-'? ['0'-'9']+(white) *)
 
+(*
+| "let" { LET }
+| '=' { EQUALS }
+*)
 (* lexbuf available in rules *)
 rule read =
   parse
   | white { read lexbuf }
   | newline { next_line lexbuf; read lexbuf }
-  | int { INT (int_of_string (Lexing.lexeme lexbuf)) }
-  | "mod" { MODULO }
-  | "true"  { TRUE }
-  | "false" { FALSE }
-  | id  { ID  (Lexing.lexeme lexbuf)}
-  (*
-  | "let" { LET }
-  | '=' { EQUALS }
   | ';' { SEMICOLON }
-  *)
+  | '{' { LEFT_BRACE }
+  | '}' { RIGHT_BRACE }
   | '(' { LEFT_PARENS }
   | ')' { RIGHT_PARENS }
   | '*' { TIMES }
   | '/' { DIVIDE }
   | '-' { MINUS }
   | '+' { PLUS }
-  | eof { EOF }
+  | '=' { EQUALS }
+  | '>' { GREATER }
+  | '<' { LESSER }
+  | "<=" { LESSER_EQUAL}
+  | ">=" { GREATER_EQUAL }
+  (* | ":=" { ASSIGN } *)
+  | "!=" { NOT_EQUALS }
+  | int { INT (int_of_string (Lexing.lexeme lexbuf)) }
+  | "in"  { IN }
+  | "if"  { IF }
+  | "let" { LET }
+  | "mod" { MODULO }
+  | "else" { ELSE }
+  (* | "when" { WHEN } *)
+  | "true"  { TRUE }
+  | "false" { FALSE }
+  | id  { ID  (Lexing.lexeme lexbuf)}
   | _ { raise (SyntaxError ("Unexepected character: " ^ Lexing.lexeme lexbuf)) }
+  | eof { EOF }
+

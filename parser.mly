@@ -7,6 +7,7 @@
 %token LET
 
 
+
 Keyword version:
 if boolExpr then expr else expr
 Braces version:
@@ -27,12 +28,14 @@ match expr with
 %token LEFT_PARENS RIGHT_PARENS
 %token LEFT_BRACE RIGHT_BRACE
 %token SEMICOLON
-%token EOL
+
+(* %token EOL *)
 
 %token IF ELSE
-(*
- %token WHEN
- *)
+%token WHEN
+
+%token UNIT
+
 %token LET
 %token IN
 
@@ -40,12 +43,19 @@ match expr with
 %token LESSER_EQUAL GREATER_EQUAL
 %token GREATER LESSER
 %token NOT_EQUALS EQUALS
+
+%token EOF
+
+%nonassoc IN SEMICOLON
+
+%left PLUS MINUS
+%left TIMES DIVIDE MODULO
+
 (*
 %token ASSIGN
  *)
 
 
-%token EOF
 (*
  Precedency
  0: *
@@ -54,13 +64,10 @@ match expr with
  4: -
 *)
 
-%left PLUS MINUS
-%left TIMES DIVIDE MODULO
-
-%start <Ast.expr option> prog
+%start <Ast.expr option> program
 %%
 
-prog:
+program:
   | EOF { None };
   | e = expression EOF { Some e };
 
@@ -84,23 +91,29 @@ stm:
 
 
 expression:
-  | TRUE { Ast.True }
-  | FALSE { Ast.False }
-  | i  = INT { Ast.Int i }
-  | id = ID  { Ast.Id id }
+  | UNIT     { Ast.Unit }
+  | TRUE     { Ast.True }
+  | FALSE    { Ast.False }
+  | i  = INT { Ast.Int (i) }
+  | id = ID  { Ast.Id (id) }
   | left = expression; op = binop; right = expression
-    { Ast.BinOp (left, op, right) }
+    { Ast.Op (op, left, right) }
     (* Block Expression; scoping. *)
-  | LEFT_BRACK; e = expression; RIGHT_BRACE
+  | LEFT_BRACE; e = expression; RIGHT_BRACE
     { e }
   | LEFT_PARENS; e = expression ;RIGHT_PARENS
     { e }
   | IF; predicat = expression; LEFT_BRACE; ifExpr = expression; RIGHT_BRACE;
     ELSE; LEFT_BRACE; elseExpr = expression; RIGHT_BRACE
-    { Ast.IfExpr(predicat, ifExpr, elseExpr) }
+    { Ast.If (predicat, ifExpr, elseExpr) }
+  | WHEN; test = expression; LEFT_BRACE; whenExpr = expression; RIGHT_BRACE;
+    { Ast.If (test, whenExpr, Ast.Unit) }
   | LET; id = ID; EQUALS; dec = expression; IN; body = expression;
-    { Ast.LetExpr(id, dec, body) }
+    { Ast.Let (id, dec, body) }
   | left = expression; SEMICOLON; right = expression;
-    { Ast.SeqExpr(left, right)}
+    { Ast.Seq (left, right) }
+(*
+  | FUNCTION; id = ID;  ;EQUALS
+ *)
 
 

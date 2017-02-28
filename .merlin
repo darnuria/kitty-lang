@@ -1,2 +1,4 @@
 PKG menhirLib
+PKG cmdliner
+PKG containers
 B _build

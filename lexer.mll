@@ -2,7 +2,7 @@
 open Lexing
 open Parser
 
-exception SyntaxError of string
+exception SyntaxError of (string)
 
 let next_line lexbuf =
   let pos = lexbuf.lex_curr_p in
@@ -31,32 +31,40 @@ rule read =
   parse
   | white { read lexbuf }
   | newline { next_line lexbuf; read lexbuf }
-  | ';' { SEMICOLON }
-  | '{' { LEFT_BRACE }
-  | '}' { RIGHT_BRACE }
-  | '(' { LEFT_PARENS }
-  | ')' { RIGHT_PARENS }
-  | '*' { TIMES }
-  | '/' { DIVIDE }
-  | '-' { MINUS }
-  | '+' { PLUS }
-  | '=' { EQUALS }
-  | '>' { GREATER }
-  | '<' { LESSER }
+
+  (* | ',' { COMMA } *)
+  | ';'  { SEMICOLON }
+  | '{'  { LEFT_BRACE }
+  | '}'  { RIGHT_BRACE }
+  | '('  { LEFT_PARENS }
+  | ')'  { RIGHT_PARENS }
+  | '*'  { TIMES }
+  | '/'  { DIVIDE }
+  | '-'  { MINUS }
+  | '+'  { PLUS }
+  | '='  { EQUALS }
+  | '>'  { GREATER }
+  | '<'  { LESSER }
   | "<=" { LESSER_EQUAL}
   | ">=" { GREATER_EQUAL }
   (* | ":=" { ASSIGN } *)
   | "!=" { NOT_EQUALS }
-  | int { INT (int_of_string (Lexing.lexeme lexbuf)) }
-  | "in"  { IN }
-  | "if"  { IF }
-  | "let" { LET }
-  | "mod" { MODULO }
-  | "else" { ELSE }
-  (* | "when" { WHEN } *)
-  | "true"  { TRUE }
-  | "false" { FALSE }
-  | id  { ID  (Lexing.lexeme lexbuf)}
+
+  | int     { INT (int_of_string (Lexing.lexeme lexbuf)) }
+  (* | fun     { FUNCTION } *)
+  (* | match   { MATCH } *)
+  (* | enum    { TYPE_SUM } *)
+  (* | record { RECCORD_STRUCT } *)
+  | "if"    { IF }
+  | "let"   { LET }
+  | "in"    { IN }
+  | "mod"   { MODULO }
+  | "else"  { ELSE }
+  | "when"  { WHEN }
+  | "()"    { UNIT }
+  | "True"  { TRUE }
+  | "False" { FALSE }
+  | id      { ID  (Lexing.lexeme lexbuf) }
+  | eof     { EOF }
   | _ { raise (SyntaxError ("Unexepected character: " ^ Lexing.lexeme lexbuf)) }
-  | eof { EOF }
 

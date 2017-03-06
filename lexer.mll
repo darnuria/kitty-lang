@@ -58,6 +58,9 @@ rule read =
   | "if"    { IF }
   | "let"   { LET }
   | "in"    { IN }
+  | "fn"    { LAMBDA }
+  | "fun"   { FUNCTION }
+  | "end"   { END }
   | "mod"   { MODULO }
   | "else"  { ELSE }
   | "when"  { WHEN }

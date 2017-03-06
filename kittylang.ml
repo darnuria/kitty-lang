@@ -8,7 +8,6 @@
 *)
 
 open Cmdliner
-module P = Printf
 
 (*
 type verbosity =
@@ -23,7 +22,7 @@ let string_of_verbosity = function
 let string_of_position lexbuf =
   let open Lexing in
   let pos = lexbuf.lex_curr_p in
-  Printf.sprintf "%s:%d:%d" pos.pos_fname
+  Printf.sprintf "file: %s; line: %d; column: %d" pos.pos_fname
     pos.pos_lnum (pos.pos_cnum - pos.pos_bol + 1)
 
 let parse_with_error lexbuf =
@@ -61,7 +60,7 @@ let compile_prog prog =
   |> Compiler.compile_prog (Prim.init_prim_env ())
 *)
 
-let result_string = P.sprintf
+let result_string = Printf.sprintf
     "\n===========================\n%s\n===========================\n"
 
 let select_action parse compile expand =
@@ -69,7 +68,7 @@ let select_action parse compile expand =
     (fun prog ->
        Ast.string_of_program prog
        |> result_string
-       |> P.sprintf "Parsed program:%s")
+       |> Printf.sprintf "Parsed program:%s")
   else if expand then
     failwith "-expand Not implemented"
     (*
@@ -105,7 +104,7 @@ let cmicrojs parse expand compile filename =
   | `Ok prog ->
     if (parse <> compile <> expand) then
       let action = select_action parse compile expand in
-      `Ok (P.printf "%s" (action prog))
+      `Ok (Printf.printf "%s" (action prog))
     else
       `Error (false, "Compile to bytecode not implemented.")
   (* `Ok (compile_prog prog) *)

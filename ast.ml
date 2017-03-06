@@ -18,7 +18,8 @@ and expr =
   | If  of (expr * expr * expr)
   | Let of (id * expr * expr)
   | Seq of (expr * expr)
-  (* | Fun (id * expr list) *)
+  | Fun of (id * id list * expr)
+  | Lambda of (id list * expr)
 (* Statements/Instruction.
  * Return ()
  * like assignation
@@ -81,7 +82,7 @@ let rec string_of_expr = function
        (string_of_expr then')
        (string_of_expr else'))
   | Let (id, init, body) ->
-    (Printf.sprintf "let %s = %s in %s"
+    (Printf.sprintf "let %s = %s in %s end"
        id
        (string_of_expr init)
        (string_of_expr body))
@@ -89,6 +90,16 @@ let rec string_of_expr = function
     (Printf.sprintf "%s ; %s"
        (string_of_expr left)
        (string_of_expr right))
+  | Fun (id, args, body) ->
+    (Printf.sprintf "fun %s %s {\n%s\n}"
+       (string_of_id id)
+       (List.map string_of_id args |> String.concat " ")
+       (string_of_expr body))
+  | Lambda (args, body) ->
+    (Printf.sprintf "fn %s {\n%s\n}"
+       (List.map string_of_id args |> String.concat " ")
+       (string_of_expr body))
+
 
 (* TODO: implem it really. *)
 let string_of_program = string_of_expr

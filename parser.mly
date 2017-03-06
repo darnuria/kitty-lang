@@ -38,6 +38,9 @@ match expr with
 
 %token LET
 %token IN
+%token END
+%token FUNCTION
+%token LAMBDA
 
 %token DIVIDE PLUS MINUS TIMES MODULO
 %token LESSER_EQUAL GREATER_EQUAL
@@ -46,15 +49,16 @@ match expr with
 
 %token EOF
 
-%nonassoc IN SEMICOLON
+%nonassoc SEMICOLON
+%nonassoc EQUALS
 
 %left PLUS MINUS
 %left TIMES DIVIDE MODULO
+%left LESSER_EQUAL GREATER_EQUAL GREATER LESSER NOT_EQUALS
 
 (*
 %token ASSIGN
  *)
-
 
 (*
  Precedency
@@ -90,6 +94,17 @@ stm:
   | EQUALS        { Ast.Eq }
 
 
+fun_args:
+  | (* end of args *) { [] }
+  | arg = ID; args = fun_args
+    { arg :: args }
+
+(*
+  (* { <expression> } *)
+  | LEFT_BRACE; e = expression; RIGHT_BRACE
+    { e }
+  (* let <pattern> = <expression in <expression> end *)
+*)
 expression:
   | UNIT     { Ast.Unit }
   | TRUE     { Ast.True }
@@ -98,22 +113,28 @@ expression:
   | id = ID  { Ast.Id (id) }
   | left = expression; op = binop; right = expression
     { Ast.Op (op, left, right) }
-    (* Block Expression; scoping. *)
-  | LEFT_BRACE; e = expression; RIGHT_BRACE
-    { e }
+  (* ( <expression> ) *)
   | LEFT_PARENS; e = expression ;RIGHT_PARENS
     { e }
+  (* if <expression> { <expression> } else { <expression> } *)
   | IF; predicat = expression; LEFT_BRACE; ifExpr = expression; RIGHT_BRACE;
     ELSE; LEFT_BRACE; elseExpr = expression; RIGHT_BRACE
     { Ast.If (predicat, ifExpr, elseExpr) }
-  | WHEN; test = expression; LEFT_BRACE; whenExpr = expression; RIGHT_BRACE;
+  (* when <expr> { <expression> } *)
+  | WHEN; test = expression; LEFT_BRACE; whenExpr = expression; RIGHT_BRACE
     { Ast.If (test, whenExpr, Ast.Unit) }
-  | LET; id = ID; EQUALS; dec = expression; IN; body = expression;
+  (* let <identifiant> = <expression> in expression end *)
+  | LET; id = ID; EQUALS; dec = expression; IN; body = expression; END
     { Ast.Let (id, dec, body) }
-  | left = expression; SEMICOLON; right = expression;
+  (* <expression>; <expression> *)
+  | left = expression; SEMICOLON; right = expression
     { Ast.Seq (left, right) }
-(*
-  | FUNCTION; id = ID;  ;EQUALS
- *)
+  (* fun <identifiant> <args_list> { <expression> } *)
+  | FUNCTION; id = ID; args = fun_args; LEFT_BRACE;
+    fun_body = expression; RIGHT_BRACE
+   { Ast.Fun (id, args, fun_body)}
+  (* lambda: fn <args_list> { <expression> } *)
+  | LAMBDA; args = fun_args; LEFT_BRACE; fun_body = expression; RIGHT_BRACE
+    { Ast.Lambda (args, fun_body) }
 
 

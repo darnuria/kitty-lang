@@ -4,3 +4,4 @@ let a = 1 in
   } else {
     4
   }
+end

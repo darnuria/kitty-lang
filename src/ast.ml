@@ -87,7 +87,7 @@ let rec string_of_expr = function
        (string_of_expr init)
        (string_of_expr body))
   | Seq (left, right) ->
-    (Printf.sprintf "%s ; %s"
+    (Printf.sprintf "%s;\n%s"
        (string_of_expr left)
        (string_of_expr right))
   | Fun (id, args, body) ->

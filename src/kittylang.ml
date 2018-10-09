@@ -70,7 +70,7 @@ let select_action parse compile expand =
        |> result_string
        |> Printf.sprintf "Parsed program:%s")
   else if expand then
-    failwith "-expand Not implemented"
+    failwith "--expand Not implemented"
     (*
     (fun prog ->
        Expander.expand_prog prog
@@ -79,7 +79,7 @@ let select_action parse compile expand =
        |> P.sprintf "Kernal Abstract Syntax Tree:%s")
     *)
   else if compile then
-    failwith "-compile Not implemented"
+    failwith "--compile Not implemented"
     (*
     (fun prog ->
       compile_prog prog
